@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengenalan Koding dan Kecerdasan Artifisial</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Chosen Palette: Calm Harmony */
+        /* Background: zinc-50, Cards/Sections: zinc-100, Text: zinc-800, zinc-600, Accent: blue-500 */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FAFAFA; /* zinc-50 */
+            color: #27272A; /* zinc-800 */
+        }
+        .section-bg {
+            background-color: #F4F4F5; /* zinc-100 */
+        }
+        .nav-link.active {
+            border-bottom: 2px solid #3B82F6; /* blue-500 */
+            color: #3B82F6; /* blue-500 */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px; /* Max width for charts */
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px; /* Base height for charts */
+            max-height: 400px; /* Max height for charts */
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .tab-button.active {
+            background-color: #3B82F6; /* blue-500 */
+            color: white;
+        }
+        .accordion-header {
+            cursor: pointer;
+            user-select: none;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .accordion-content.open {
+            max-height: 200px; /* Adjust as needed for content */
+        }
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #3B82F6;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Application Structure Plan: The SPA will follow a vertical scrolling single-page layout, divided into distinct, thematic sections. A fixed top navigation bar will allow users to jump directly to any major section. The sections are: Header, Pendahuluan (Introduction), Dunia Koding (World of Coding - encompassing coding definition, benefits, popular languages, basic concepts, and applications), Memahami AI (Understanding AI - covering AI definition, importance, branches, and applications), Eksplorasi AI Interaktif (Interactive AI Exploration - new section for LLM interaction), Etika & Masa Depan (Ethics & Future - combining ethical considerations and future outlook via a tabbed interface), and Kesimpulan (Conclusion). This structure was chosen to provide a clear, logical flow for a beginner audience while allowing non-linear exploration via navigation. Grouping related concepts enhances understanding, and interactive elements like accordions and tabs help manage content density and allow selective deep dives. -->
+    <!-- Visualization & Content Choices: "Mengapa Koding dan AI Penting?": Goal: Inform. Method: List with icons. Interaction: None. Justification: Simple, clear bullet points with visual cues. Library/Method: HTML/CSS/Tailwind, Unicode. "Bahasa Pemrograman Populer": Goal: Compare. Method: Horizontal Bar Chart. Interaction: Chart.js tooltips. Justification: Visually compares relative popularity/ease of learning. Library/Method: Chart.js (Canvas). "Konsep Dasar Koding": Goal: Organize/Inform. Method: Accordion/Collapsible sections. Interaction: Click to expand/collapse. Justification: Presents detailed definitions compactly, user-controlled disclosure. Library/Method: HTML/CSS/Tailwind, Vanilla JS. "Cabang-cabang AI": Goal: Inform/Organize. Method: Bar Chart. Interaction: Chart.js tooltips. Justification: Visual overview of AI sub-fields and their distinctness. Library/Method: Chart.js (Canvas). "Contoh Aplikasi Koding" & "Contoh Aplikasi AI": Goal: Inform/Illustrate. Method: Grid of cards with text and Unicode icons. Interaction: Subtle hover effect. Justification: Visually appealing way to showcase diverse examples. Library/Method: HTML/CSS/Tailwind, Unicode. "Eksplorasi AI Interaktif": Goal: Engage/Explain. Method: Text input, button, and text output. Interaction: User input, LLM call, dynamic text display. Justification: Provides a direct, interactive way for users to get quick explanations of concepts using AI. Library/Method: Vanilla JS, Gemini API. "Etika dalam AI" & "Masa Depan Koding dan AI": Goal: Inform/Compare. Method: Tabbed interface. Interaction: Click tabs to switch content. Justification: Groups related but distinct information, saving vertical space and allowing focused viewing. Library/Method: HTML/CSS/Tailwind, Vanilla JS. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <!-- Navigation Bar -->
+    <nav class="fixed top-0 left-0 right-0 bg-white shadow-md z-50 py-4 px-6 md:px-12">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="#home" class="text-xl md:text-2xl font-bold text-blue-600">Koding & AI</a>
+            <div class="hidden md:flex space-x-8">
+                <a href="#pendahuluan" class="nav-link text-zinc-600 hover:text-blue-500 transition-colors duration-200">Pendahuluan</a>
+                <a href="#koding" class="nav-link text-zinc-600 hover:text-blue-500 transition-colors duration-200">Dunia Koding</a>
+                <a href="#ai" class="nav-link text-zinc-600 hover:text-blue-500 transition-colors duration-200">Memahami AI</a>
+                <a href="#ai-interaktif" class="nav-link text-zinc-600 hover:text-blue-500 transition-colors duration-200">Eksplorasi AI ✨</a>
+                <a href="#etika-masa-depan" class="nav-link text-zinc-600 hover:text-blue-500 transition-colors duration-200">Etika & Masa Depan</a>
+                <a href="#kesimpulan" class="nav-link text-zinc-600 hover:text-blue-500 transition-colors duration-200">Kesimpulan</a>
+            </div>
+            <!-- Mobile Menu Button -->
+            <button id="mobile-menu-button" class="md:hidden text-zinc-600 focus:outline-none">
+                <span class="text-2xl">☰</span>
+            </button>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden mt-4 space-y-2">
+            <a href="#pendahuluan" class="block text-zinc-600 hover:text-blue-500 py-2 px-4 rounded-md">Pendahuluan</a>
+            <a href="#koding" class="block text-zinc-600 hover:text-blue-500 py-2 px-4 rounded-md">Dunia Koding</a>
+            <a href="#ai" class="block text-zinc-600 hover:text-blue-500 py-2 px-4 rounded-md">Memahami AI</a>
+            <a href="#ai-interaktif" class="block text-zinc-600 hover:text-blue-500 py-2 px-4 rounded-md">Eksplorasi AI ✨</a>
+            <a href="#etika-masa-depan" class="block text-zinc-600 hover:text-blue-500 py-2 px-4 rounded-md">Etika & Masa Depan</a>
+            <a href="#kesimpulan" class="block text-zinc-600 hover:text-blue-500 py-2 px-4 rounded-md">Kesimpulan</a>
+        </div>
+    </nav>
+
+    <main class="pt-24 pb-12 px-4 md:px-8 max-w-7xl mx-auto">
+        <!-- Home/Introduction Section -->
+        <section id="home" class="min-h-[calc(100vh-6rem)] flex flex-col justify-center items-center text-center py-16">
+            <h1 class="text-4xl md:text-6xl font-extrabold text-zinc-900 mb-4 leading-tight">
+                Pengenalan Koding dan Kecerdasan Artifisial
+            </h1>
+            <p class="text-xl md:text-2xl text-zinc-700 max-w-3xl mb-8">
+                Membuka Gerbang Dunia Digital dan Inovasi Masa Depan
+            </p>
+            <button onclick="document.getElementById('pendahuluan').scrollIntoView({ behavior: 'smooth' });" class="bg-blue-600 text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-blue-700 transition-all duration-300 shadow-lg">
+                Mulai Jelajahi
+            </button>
+        </section>
+
+        <!-- Pendahuluan Section -->
+        <section id="pendahuluan" class="section-bg rounded-xl shadow-lg p-8 md:p-12 mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold text-zinc-800 mb-6 text-center">Pendahuluan: Mengapa Koding dan AI Penting?</h2>
+            <p class="text-lg text-zinc-700 mb-8 text-center max-w-3xl mx-auto">
+                Bagian ini menjelaskan mengapa koding dan Kecerdasan Artifisial (AI) menjadi pilar utama di era digital saat ini. Memahami konsep-konsep ini akan membuka wawasan tentang bagaimana teknologi membentuk dunia kita dan peluang apa saja yang bisa kita raih.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+                    <div class="text-5xl mb-4 text-blue-500 text-center">🌐</div>
+                    <h3 class="text-xl font-semibold mb-2 text-zinc-800 text-center">Transformasi Digital</h3>
+                    <p class="text-zinc-600 text-center">Kita hidup di era di mana teknologi mendefinisikan ulang cara kita bekerja, belajar, dan berinteraksi.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+                    <div class="text-5xl mb-4 text-blue-500 text-center">💼</div>
+                    <h3 class="text-xl font-semibold mb-2 text-zinc-800 text-center">Peluang Karir</h3>
+                    <p class="text-zinc-600 text-center">Keterampilan koding dan pemahaman AI sangat dicari di berbagai industri.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+                    <div class="text-5xl mb-4 text-blue-500 text-center">💡</div>
+                    <h3 class="text-xl font-semibold mb-2 text-zinc-800 text-center">Inovasi</h3>
+                    <p class="text-zinc-600 text-center">Membangun solusi baru untuk tantangan kompleks.</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+                    <div class="text-5xl mb-4 text-blue-500 text-center">💪</div>
+                    <h3 class="text-xl font-semibold mb-2 text-zinc-800 text-center">Pemberdayaan</h3>
+                    <p class="text-zinc-600 text-center">Memberi Anda kemampuan untuk menciptakan, bukan hanya mengonsumsi teknologi.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dunia Koding Section -->
+        <section id="koding" class="section-bg rounded-xl shadow-lg p-8 md:p-12 mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold text-zinc-800 mb-6 text-center">Dunia Koding</h2>
+            <p class="text-lg text-zinc-700 mb-8 text-center max-w-3xl mx-auto">
+                Bagian ini akan membawa Anda masuk ke dalam dunia koding, menjelaskan apa itu koding, mengapa penting untuk mempelajarinya, bahasa pemrograman populer yang bisa Anda mulai, serta konsep-konsep dasar yang menjadi pondasi setiap program. Anda juga akan melihat contoh-contoh aplikasi koding di sekitar kita.
+            </p>
+
+            <!-- What is Coding? -->
+            <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+                <h3 class="text-2xl font-semibold text-zinc-800 mb-4">Koding: Bahasa Komputer</h3>
+                <p class="text-zinc-600 mb-2"><span class="font-semibold">Definisi:</span> Koding (atau pemrograman) adalah proses menulis instruksi yang dapat dipahami dan dijalankan oleh komputer.</p>
+                <p class="text-zinc-600 mb-2"><span class="font-semibold">Tujuan:</span> Memberi tahu komputer apa yang harus dilakukan, langkah demi langkah, untuk menyelesaikan suatu tugas.</p>
+                <p class="text-zinc-600"><span class="font-semibold">Analogi:</span> Seperti menulis resep untuk koki (komputer), di mana setiap langkah harus jelas dan spesifik.</p>
+            </div>
+
+            <!-- Benefits of Coding -->
+            <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+                <h3 class="text-2xl font-semibold text-zinc-800 mb-4">Mengapa Belajar Koding?</h3>
+                <ul class="list-disc list-inside text-zinc-600 space-y-2">
+                    <li><span class="font-semibold">Penyelesaian Masalah:</span> Mengembangkan kemampuan berpikir logis dan analitis.</li>
+                    <li><span class="font-semibold">Kreativitas:</span> Membangun aplikasi, game, situs web, dan banyak lagi dari nol.</li>
+                    <li><span class="font-semibold">Otomatisasi:</span> Mengotomatiskan tugas-tugas berulang untuk efisiensi.</li>
+                    <li><span class="font-semibold">Pemahaman Teknologi:</span> Memahami cara kerja di balik layar perangkat lunak dan aplikasi yang kita gunakan setiap hari.</li>
+                </ul>
+            </div>
+
+            <!-- Popular Programming Languages Chart -->
+            <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+                <h3 class="text-2xl font-semibold text-zinc-800 mb-4 text-center">Bahasa Pemrograman Populer</h3>
+                <p class="text-zinc-600 text-center mb-4">Grafik ini menunjukkan beberapa bahasa pemrograman yang banyak digunakan dan relevan saat ini, dengan perkiraan popularitas relatifnya.</p>
+                <div class="chart-container">
+                    <canvas id="popularLanguagesChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Basic Coding Concepts Accordion -->
+            <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+                <h3 class="text-2xl font-semibold text-zinc-800 mb-4 text-center">Konsep Dasar Koding</h3>
+                <p class="text-zinc-600 text-center mb-4">Jelajahi blok bangunan dasar yang membentuk setiap program komputer.</p>
+                <div class="space-y-4">
+                    <div class="accordion-item border border-zinc-200 rounded-lg">
+                        <div class="accordion-header flex justify-between items-center p-4 bg-zinc-50 hover:bg-zinc-100 transition-colors duration-200 rounded-t-lg">
+                            <span class="font-semibold text-zinc-800">Variabel</span>
+                            <span class="text-xl transform transition-transform duration-300">▼</span>
+                        </div>
+                        <div class="accordion-content p-4 text-zinc-600 border-t border-zinc-200 rounded-b-lg">
+                            Wadah untuk menyimpan data (misalnya, angka, teks).
+                        </div>
+                    </div>
+                    <div class="accordion-item border border-zinc-200 rounded-lg">
+                        <div class="accordion-header flex justify-between items-center p-4 bg-zinc-50 hover:bg-zinc-100 transition-colors duration-200 rounded-t-lg">
+                            <span class="font-semibold text-zinc-800">Tipe Data</span>
+                            <span class="text-xl transform transition-transform duration-300">▼</span>
+                        </div>
+                        <div class="accordion-content p-4 text-zinc-600 border-t border-zinc-200 rounded-b-lg">
+                            Jenis data yang disimpan (misalnya, bilangan bulat, teks, boolean).
+                        </div>
+                    </div>
+                    <div class="accordion-item border border-zinc-200 rounded-lg">
+                        <div class="accordion-header flex justify-between items-center p-4 bg-zinc-50 hover:bg-zinc-100 transition-colors duration-200 rounded-t-lg">
+                            <span class="font-semibold text-zinc-800">Operator</span>
+                            <span class="text-xl transform transition-transform duration-300">▼</span>
+                        </div>
+                        <div class="accordion-content p-4 text-zinc-600 border-t border-zinc-200 rounded-b-lg">
+                            Simbol untuk melakukan operasi (misalnya, +, -, *, /, ==).
+                        </div>
+                    </div>
+                    <div class="accordion-item border border-zinc-200 rounded-lg">
+                        <div class="accordion-header flex justify-between items-center p-4 bg-zinc-50 hover:bg-zinc-100 transition-colors duration-200 rounded-t-lg">
+                            <span class="font-semibold text-zinc-800">Kondisional (If/Else)</span>
+                            <span class="text-xl transform transition-transform duration-300">▼</span>
+                        </div>
+                        <div class="accordion-content p-4 text-zinc-600 border-t border-zinc-200 rounded-b-lg">
+                            Membuat keputusan berdasarkan kondisi.
+                        </div>
+                    </div>
+                    <div class="accordion-item border border-zinc-200 rounded-lg">
+                        <div class="accordion-header flex justify-between items-center p-4 bg-zinc-50 hover:bg-zinc-100 transition-colors duration-200 rounded-t-lg">
+                            <span class="font-semibold text-zinc-800">Looping (For/While)</span>
+                            <span class="text-xl transform transition-transform duration-300">▼</span>
+                        </div>
+                        <div class="accordion-content p-4 text-zinc-600 border-t border-zinc-200 rounded-b-lg">
+                            Mengulang instruksi berkali-kali.
+                        </div>
+                    </div>
+                    <div class="accordion-item border border-zinc-200 rounded-lg">
+                        <div class="accordion-header flex justify-between items-center p-4 bg-zinc-50 hover:bg-zinc-100 transition-colors duration-200 rounded-t-lg">
+                            <span class="font-semibold text-zinc-800">Fungsi</span>
+                            <span class="text-xl transform transition-transform duration-300">▼</span>
+                        </div>
+                        <div class="accordion-content p-4 text-zinc-600 border-t border-zinc-200 rounded-b-lg">
+                            Blok kode yang dapat digunakan kembali untuk tugas tertentu.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Examples of Coding Applications -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-2xl font-semibold text-zinc-800 mb-4 text-center">Contoh Aplikasi Koding</h3>
+                <p class="text-zinc-600 text-center mb-4">Koding ada di mana-mana! Lihat bagaimana koding membentuk aplikasi yang kita gunakan setiap hari.</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="flex items-center p-4 rounded-lg bg-zinc-50 shadow-sm hover:shadow-md transition-shadow duration-300">
+                        <span class="text-4xl mr-4">🌐</span>
+                        <div>
+                            <h4 class="font-semibold text-zinc-800">Situs Web</h4>
+                            <p class="text-zinc-600 text-sm">Google, Facebook, Tokopedia (HTML, CSS, JavaScript, Python, PHP, dll.)</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center p-4 rounded-lg bg-zinc-50 shadow-sm hover:shadow-md transition-shadow duration-300">
+                        <span class="text-4xl mr-4">📱</span>
+                        <div>
+                            <h4 class="font-semibold text-zinc-800">Aplikasi Mobile</h4>
+                            <p class="text-zinc-600 text-sm">Instagram, WhatsApp, Gojek (Java, Kotlin, Swift, React Native)</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center p-4 rounded-lg bg-zinc-50 shadow-sm hover:shadow-md transition-shadow duration-300">
+                        <span class="text-4xl mr-4">🎮</span>
+                        <div>
+                            <h4 class="font-semibold text-zinc-800">Game</h4>
+                            <p class="text-zinc-600 text-sm">Mobile Legends, Minecraft (C++, C#, Java)</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center p-4 rounded-lg bg-zinc-50 shadow-sm hover:shadow-md transition-shadow duration-300">
+                        <span class="text-4xl mr-4">💻</span>
+                        <div>
+                            <h4 class="font-semibold text-zinc-800">Sistem Operasi</h4>
+                            <p class="text-zinc-600 text-sm">Windows, macOS, Android (C, C++, Java)</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center p-4 rounded-lg bg-zinc-50 shadow-sm hover:shadow-md transition-shadow duration-300">
+                        <span class="text-4xl mr-4">📄</span>
+                        <div>
+                            <h4 class="font-semibold text-zinc-800">Perangkat Lunak Desktop</h4>
+                            <p class="text-zinc-600 text-sm">Microsoft Office, Photoshop</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Memahami AI Section -->
+        <section id="ai" class="section-bg rounded-xl shadow-lg p-8 md:p-12 mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold text-zinc-800 mb-6 text-center">Memahami Kecerdasan Artifisial (AI)</h2>
+            <p class="text-lg text-zinc-700 mb-8 text-center max-w-3xl mx-auto">
+                Di bagian ini, kita akan menyelami dunia Kecerdasan Artifisial (AI). Anda akan memahami definisi AI, mengapa AI menjadi begitu penting dalam berbagai sektor, serta mengenal berbagai cabang AI yang membentuk teknologi canggih saat ini. Lihatlah bagaimana AI telah terintegrasi dalam kehidupan sehari-hari kita.
+            </p>
+
+            <!-- What is AI? -->
+            <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+                <h3 class="text-2xl font-semibold text-zinc-800 mb-4">AI: Komputer yang Berpikir dan Belajar</h3>
+                <p class="text-zinc-600 mb-2"><span class="font-semibold">Definisi:</span> AI adalah bidang ilmu komputer yang berfokus pada penciptaan mesin yang dapat melakukan tugas-tugas yang biasanya membutuhkan kecerdasan manusia.</p>
+                <p class="text-zinc-600"><span class="font-semibold">Tujuan:</span> Memungkinkan mesin untuk belajar, bernalar, memecahkan masalah, memahami bahasa, dan mengenali pola.</p>
+            </div>
+
+            <!-- Why AI is Important -->
+            <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+                <h3 class="text-2xl font-semibold text-zinc-800 mb-4">Mengapa AI Penting?</h3>
+                <ul class="list-disc list-inside text-zinc-600 space-y-2">
+                    <li><span class="font-semibold">Efisiensi:</span> Mengotomatiskan tugas kompleks dan berulang.</li>
+                    <li><span class="font-semibold">Inovasi:</span> Mendorong penemuan baru dalam sains dan teknologi.</li>
+                    <li><span class="font-semibold">Personalisasi:</span> Menyediakan pengalaman yang disesuaikan untuk pengguna.</li>
+                    <li><span class="font-semibold">Peningkatan Kemampuan Manusia:</span> Membantu manusia dalam membuat keputusan yang lebih baik dan lebih cepat.</li>
+                </ul>
+            </div>
+
+            <!-- Branches of AI Chart -->
+            <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+                <h3 class="text-2xl font-semibold text-zinc-800 mb-4 text-center">Cabang-cabang AI</h3>
+                <p class="text-zinc-600 text-center mb-4">Grafik ini menunjukkan berbagai cabang utama dalam Kecerdasan Artifisial, yang masing-masing fokus pada aspek kecerdasan yang berbeda.</p>
+                <div class="chart-container">
+                    <canvas id="aiBranchesChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Examples of AI Applications -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-2xl font-semibold text-zinc-800 mb-4 text-center">Contoh Aplikasi AI</h3>
+                <p class="text-zinc-600 text-center mb-4">AI sudah menjadi bagian tak terpisahkan dari kehidupan kita. Berikut adalah beberapa contoh nyata.</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="flex items-center p-4 rounded-lg bg-zinc-50 shadow-sm hover:shadow-md transition-shadow duration-300">
+                        <span class="text-4xl mr-4">🗣️</span>
+                        <div>
+                            <h4 class="font-semibold text-zinc-800">Asisten Virtual</h4>
+                            <p class="text-zinc-600 text-sm">Google Assistant, Siri, Alexa (NLP)</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center p-4 rounded-lg bg-zinc-50 shadow-sm hover:shadow-md transition-shadow duration-300">
+                        <span class="text-4xl mr-4">🛒</span>
+                        <div>
+                            <h4 class="font-semibold text-zinc-800">Rekomendasi Produk</h4>
+                            <p class="text-zinc-600 text-sm">Netflix, Spotify, YouTube (Machine Learning)</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center p-4 rounded-lg bg-zinc-50 shadow-sm hover:shadow-md transition-shadow duration-300">
+                        <span class="text-4xl mr-4">🚗</span>
+                        <div>
+                            <h4 class="font-semibold text-zinc-800">Mobil Otonom</h4>
+                            <p class="text-zinc-600 text-sm">Tesla, Waymo (Computer Vision, Machine Learning)</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center p-4 rounded-lg bg-zinc-50 shadow-sm hover:shadow-md transition-shadow duration-300">
+                        <span class="text-4xl mr-4">💳</span>
+                        <div>
+                            <h4 class="font-semibold text-zinc-800">Deteksi Penipuan</h4>
+                            <p class="text-zinc-600 text-sm">Perbankan dan kartu kredit (Machine Learning)</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center p-4 rounded-lg bg-zinc-50 shadow-sm hover:shadow-md transition-shadow duration-300">
+                        <span class="text-4xl mr-4">🩺</span>
+                        <div>
+                            <h4 class="font-semibold text-zinc-800">Diagnosa Medis</h4>
+                            <p class="text-zinc-600 text-sm">Analisis gambar medis untuk mendeteksi penyakit (Computer Vision, Deep Learning)</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center p-4 rounded-lg bg-zinc-50 shadow-sm hover:shadow-md transition-shadow duration-300">
+                        <span class="text-4xl mr-4">📧</span>
+                        <div>
+                            <h4 class="font-semibold text-zinc-800">Filter Spam Email</h4>
+                            <p class="text-zinc-600 text-sm">Mengidentifikasi email yang tidak diinginkan (Machine Learning)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive AI Exploration Section -->
+        <section id="ai-interaktif" class="section-bg rounded-xl shadow-lg p-8 md:p-12 mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold text-zinc-800 mb-6 text-center">Eksplorasi AI Interaktif ✨</h2>
+            <p class="text-lg text-zinc-700 mb-8 text-center max-w-3xl mx-auto">
+                Ingin tahu lebih banyak tentang konsep koding atau AI? Ketikkan pertanyaan atau konsep di bawah ini, dan AI akan memberikan penjelasan singkat untuk Anda!
+            </p>
+
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <div class="mb-4">
+                    <label for="aiConceptInput" class="block text-zinc-700 text-lg font-semibold mb-2">Tanyakan Konsep Koding/AI:</label>
+                    <input type="text" id="aiConceptInput" placeholder="Contoh: Apa itu Python?" class="w-full p-3 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-zinc-800">
+                </div>
+                <button id="explainConceptButton" class="bg-blue-600 text-white px-6 py-3 rounded-full text-lg font-semibold hover:bg-blue-700 transition-all duration-300 shadow-lg flex items-center justify-center">
+                    <span id="buttonText">Jelaskan Konsep ✨</span>
+                    <div id="loadingSpinner" class="loading-spinner ml-3 hidden"></div>
+                </button>
+
+                <div id="aiResponse" class="mt-8 p-6 bg-zinc-50 border border-zinc-200 rounded-lg text-zinc-700 min-h-[100px] flex items-center justify-center text-center italic">
+                    Penjelasan AI akan muncul di sini...
+                </div>
+            </div>
+        </section>
+
+        <!-- Etika & Masa Depan Section -->
+        <section id="etika-masa-depan" class="section-bg rounded-xl shadow-lg p-8 md:p-12 mb-12">
+            <h2 class="text-3xl md:text-4xl font-bold text-zinc-800 mb-6 text-center">Etika & Masa Depan Koding dan AI</h2>
+            <p class="text-lg text-zinc-700 mb-8 text-center max-w-3xl mx-auto">
+                Bagian ini membahas pertimbangan etis yang krusial dalam pengembangan AI dan bagaimana koding serta AI akan terus membentuk masa depan kita. Gunakan tombol di bawah untuk beralih antara topik etika dan proyeksi masa depan.
+            </p>
+
+            <div class="flex justify-center mb-8">
+                <button id="ethics-tab" class="tab-button px-6 py-3 rounded-l-full bg-zinc-200 text-zinc-700 font-semibold hover:bg-blue-100 transition-colors duration-200 active">Etika dalam AI</button>
+                <button id="future-tab" class="tab-button px-6 py-3 rounded-r-full bg-zinc-200 text-zinc-700 font-semibold hover:bg-blue-100 transition-colors duration-200">Masa Depan</button>
+            </div>
+
+            <div id="ethics-content" class="tab-content bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-2xl font-semibold text-zinc-800 mb-4">Pertimbangan Penting dalam Etika AI</h3>
+                <ul class="list-disc list-inside text-zinc-600 space-y-2">
+                    <li><span class="font-semibold">Privasi Data:</span> Bagaimana data pribadi digunakan oleh sistem AI?</li>
+                    <li><span class="font-semibold">Bias Algoritma:</span> Apakah AI membuat keputusan yang adil dan tidak diskriminatif?</li>
+                    <li><span class="font-semibold">Keamanan:</span> Bagaimana mencegah penyalahgunaan AI?</li>
+                    <li><span class="font-semibold">Dampak Sosial:</span> Pengaruh AI terhadap pekerjaan dan masyarakat.</li>
+                    <li><span class="font-semibold">Transparansi:</span> Apakah kita memahami bagaimana AI membuat keputusan?</li>
+                </ul>
+            </div>
+
+            <div id="future-content" class="tab-content hidden bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-2xl font-semibold text-zinc-800 mb-4">Revolusi yang Berkelanjutan</h3>
+                <ul class="list-disc list-inside text-zinc-600 space-y-2">
+                    <li><span class="font-semibold">AI yang Lebih Cerdas:</span> Sistem yang lebih adaptif, otonom, dan mampu belajar dari sedikit data.</li>
+                    <li><span class="font-semibold">Koding yang Lebih Mudah:</span> Alat dan platform yang memungkinkan lebih banyak orang untuk membuat aplikasi tanpa koding mendalam (low-code/no-code).</li>
+                    <li><span class="font-semibold">Integrasi Lebih Dalam:</span> AI akan semakin terintegrasi ke dalam setiap aspek kehidupan dan industri.</li>
+                    <li><span class="font-semibold">Peluang Baru:</span> Penciptaan pekerjaan dan industri yang belum pernah ada sebelumnya.</li>
+                </ul>
+            </div>
+
+            <!-- Coding and AI: Close Relationship -->
+            <div class="bg-white p-6 rounded-lg shadow-md mt-8">
+                <h3 class="text-2xl font-semibold text-zinc-800 mb-4 text-center">Koding dan AI: Hubungan Erat</h3>
+                <p class="text-zinc-600 text-center mb-4">Koding dan AI saling melengkapi dan mendorong inovasi satu sama lain.</p>
+                <div class="flex flex-col md:flex-row items-center justify-center gap-8">
+                    <div class="text-center">
+                        <span class="text-6xl text-blue-500">⚙️</span>
+                        <h4 class="font-semibold text-zinc-800 mt-2">Koding adalah Fondasi AI</h4>
+                        <p class="text-zinc-600 text-sm max-w-xs mx-auto">Anda membutuhkan keterampilan koding untuk membangun, melatih, dan menerapkan model AI.</p>
+                    </div>
+                    <div class="text-center">
+                        <span class="text-6xl text-blue-500">🚀</span>
+                        <h4 class="font-semibold text-zinc-800 mt-2">AI Meningkatkan Koding</h4>
+                        <p class="text-zinc-600 text-sm max-w-xs mx-auto">AI dapat membantu pengembang menulis kode lebih cepat, mendeteksi bug, dan mengoptimalkan kinerja.</p>
+                    </div>
+                    <div class="text-center">
+                        <span class="text-6xl text-blue-500">🔗</span>
+                        <h4 class="font-semibold text-zinc-800 mt-2">Sinergi</h4>
+                        <p class="text-zinc-600 text-sm max-w-xs mx-auto">Koding adalah alat untuk mewujudkan ide-ide AI, dan AI adalah tujuan yang ambisius bagi koder.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Conclusion Section -->
+        <section id="kesimpulan" class="section-bg rounded-xl shadow-lg p-8 md:p-12 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold text-zinc-800 mb-6">Kesimpulan: Mulai Petualangan Anda!</h2>
+            <p class="text-lg text-zinc-700 mb-8 max-w-3xl mx-auto">
+                Koding dan AI adalah dua bidang yang saling terkait dan sangat penting di era digital ini. Mereka menawarkan peluang besar untuk inovasi, karir, dan pemecahan masalah. Memulai perjalanan belajar koding adalah langkah pertama untuk memahami dan berkontribusi pada revolusi AI.
+            </p>
+            <p class="text-2xl font-semibold text-blue-600 mb-4">Ayo Mulai Belajar!</p>
+            <button onclick="window.scrollTo({ top: 0, behavior: 'smooth' });" class="bg-blue-600 text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-blue-700 transition-all duration-300 shadow-lg">
+                Kembali ke Atas
+            </button>
+        </section>
+    </main>
+
+    <script>
+        // Data for charts
+        const popularLanguagesData = {
+            labels: ['Python', 'JavaScript', 'Java', 'C++', 'HTML/CSS'],
+            datasets: [{
+                label: 'Popularitas Relatif',
+                data: [90, 85, 70, 60, 95], // Arbitrary values for demonstration
+                backgroundColor: [
+                    'rgba(59, 130, 246, 0.7)', // blue-500
+                    'rgba(34, 197, 94, 0.7)',  // green-500
+                    'rgba(249, 115, 22, 0.7)', // orange-500
+                    'rgba(139, 92, 246, 0.7)', // purple-500
+                    'rgba(239, 68, 68, 0.7)'   // red-500
+                ],
+                borderColor: [
+                    'rgba(59, 130, 246, 1)',
+                    'rgba(34, 197, 94, 1)',
+                    'rgba(249, 115, 22, 1)',
+                    'rgba(139, 92, 246, 1)',
+                    'rgba(239, 68, 68, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        const aiBranchesData = {
+            labels: ['Machine Learning', 'Deep Learning', 'NLP', 'Computer Vision', 'Robotika'],
+            datasets: [{
+                label: 'Fokus & Dampak Relatif',
+                data: [95, 85, 80, 75, 70], // Arbitrary values for demonstration
+                backgroundColor: [
+                    'rgba(59, 130, 246, 0.7)',
+                    'rgba(34, 197, 94, 0.7)',
+                    'rgba(249, 115, 22, 0.7)',
+                    'rgba(139, 92, 246, 0.7)',
+                    'rgba(239, 68, 68, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(59, 130, 246, 1)',
+                    'rgba(34, 197, 94, 1)',
+                    'rgba(249, 115, 22, 1)',
+                    'rgba(139, 92, 246, 1)',
+                    'rgba(239, 68, 68, 1)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        // Chart.js configuration for label wrapping and tooltips
+        const chartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y', // For horizontal bar chart
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.x !== null) {
+                                label += context.parsed.x + '%';
+                            }
+                            return label;
+                        }
+                    }
+                },
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Tingkat (Skala Arbitrer)'
+                    }
+                },
+                y: {
+                    ticks: {
+                        callback: function(value, index, values) {
+                            const label = this.getLabelForValue(value);
+                            const words = label.split(' ');
+                            if (words.length > 2 || label.length > 16) {
+                                return words.reduce((acc, word) => {
+                                    if (acc.length === 0) {
+                                        acc.push(word);
+                                    } else if ((acc[acc.length - 1] + ' ' + word).length <= 16) {
+                                        acc[acc.length - 1] += ' ' + word;
+                                    } else {
+                                        acc.push(word);
+                                    }
+                                    return acc;
+                                }, []);
+                            }
+                            return label;
+                        }
+                    }
+                }
+            }
+        };
+
+        // Initialize Charts
+        window.onload = function() {
+            const popularLanguagesCtx = document.getElementById('popularLanguagesChart').getContext('2d');
+            new Chart(popularLanguagesCtx, {
+                type: 'bar',
+                data: popularLanguagesData,
+                options: chartOptions
+            });
+
+            const aiBranchesCtx = document.getElementById('aiBranchesChart').getContext('2d');
+            new Chart(aiBranchesCtx, {
+                type: 'bar',
+                data: aiBranchesData,
+                options: chartOptions
+            });
+
+            // Mobile menu toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', function() {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // Accordion logic
+            document.querySelectorAll('.accordion-header').forEach(header => {
+                header.addEventListener('click', () => {
+                    const content = header.nextElementSibling;
+                    const icon = header.querySelector('span:last-child');
+                    if (content.classList.contains('open')) {
+                        content.classList.remove('open');
+                        content.style.maxHeight = '0';
+                        icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        // Close all other open accordions
+                        document.querySelectorAll('.accordion-content.open').forEach(openContent => {
+                            openContent.classList.remove('open');
+                            openContent.style.maxHeight = '0';
+                            openContent.previousElementSibling.querySelector('span:last-child').style.transform = 'rotate(0deg)';
+                        });
+                        content.classList.add('open');
+                        content.style.maxHeight = content.scrollHeight + 'px'; // Set max-height to scrollHeight
+                        icon.style.transform = 'rotate(180deg)';
+                    }
+                });
+            });
+
+            // Tab logic for Etika & Masa Depan
+            const ethicsTab = document.getElementById('ethics-tab');
+            const futureTab = document.getElementById('future-tab');
+            const ethicsContent = document.getElementById('ethics-content');
+            const futureContent = document.getElementById('future-content');
+
+            ethicsTab.addEventListener('click', () => {
+                ethicsTab.classList.add('active');
+                futureTab.classList.remove('active');
+                ethicsContent.classList.remove('hidden');
+                futureContent.classList.add('hidden');
+            });
+
+            futureTab.addEventListener('click', () => {
+                futureTab.classList.add('active');
+                ethicsTab.classList.remove('active');
+                futureContent.classList.remove('hidden');
+                ethicsContent.classList.add('hidden');
+            });
+
+            // Smooth scrolling for navigation links and active state
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                    // Close mobile menu after click
+                    if (!mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                });
+            });
+
+            // Set active nav link on scroll
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            function setActiveNavLink() {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop - 100; // Offset for fixed header
+                    if (scrollY >= sectionTop) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.href.includes(current)) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+
+            window.addEventListener('scroll', setActiveNavLink);
+            setActiveNavLink(); // Initial call to set active link on load
+
+            // Gemini API Integration for Explain Concept
+            const aiConceptInput = document.getElementById('aiConceptInput');
+            const explainConceptButton = document.getElementById('explainConceptButton');
+            const aiResponse = document.getElementById('aiResponse');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const buttonText = document.getElementById('buttonText');
+
+            explainConceptButton.addEventListener('click', async () => {
+                const concept = aiConceptInput.value.trim();
+                if (concept === '') {
+                    aiResponse.textContent = 'Mohon masukkan konsep yang ingin Anda jelaskan.';
+                    return;
+                }
+
+                aiResponse.textContent = '';
+                loadingSpinner.classList.remove('hidden');
+                buttonText.classList.add('hidden');
+                explainConceptButton.disabled = true;
+
+                try {
+                    let chatHistory = [];
+                    const prompt = `Jelaskan konsep "${concept}" dalam konteks koding atau kecerdasan artifisial secara singkat dan mudah dipahami, maksimal 100 kata.`;
+                    chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+
+                    const payload = { contents: chatHistory };
+                    const apiKey = ""; // Canvas will provide this at runtime
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const result = await response.json();
+
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const text = result.candidates[0].content.parts[0].text;
+                        aiResponse.textContent = text;
+                    } else {
+                        aiResponse.textContent = 'Maaf, saya tidak dapat menjelaskan konsep ini saat ini. Coba konsep lain.';
+                    }
+                } catch (error) {
+                    console.error('Error calling Gemini API:', error);
+                    aiResponse.textContent = 'Terjadi kesalahan saat menghubungi AI. Mohon coba lagi.';
+                } finally {
+                    loadingSpinner.classList.add('hidden');
+                    buttonText.classList.remove('hidden');
+                    explainConceptButton.disabled = false;
+                }
+            });
+        };
+    </script>
+</body>
+</html>
